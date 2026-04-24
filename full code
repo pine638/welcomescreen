@@ -1,0 +1,153 @@
+import tkinter as tk
+from tkinter import ttk
+
+# ---------------- CONFIG ----------------
+
+LAB_TITLE = "Computer Lab Access System"
+LAB_SUBTITLE = "General Lab Rules & Guidelines"
+
+RULES = [
+    "Maintain silence inside the lab.",
+    "Do not use systems without permission.",
+    "Do not disconnect cables or hardware.",
+    "Handle keyboard and mouse gently.",
+    "Do not install unauthorized software.",
+    "Do not access inappropriate content.",
+    "Report any issue to the lab instructor.",
+    "Do not eat or drink near computers.",
+    "Log out after completing your work.",
+    "Follow all instructions given by lab staff."
+]
+
+# ---------------- FUNCTIONS ----------------
+
+def exit_app():
+    root.quit()
+
+def block_keys(event):
+    blocked = ["Alt_L", "Alt_R", "F4", "Escape", "Tab"]
+    if event.keysym in blocked:
+        return "break"
+
+def check_all_checked():
+    if all(var.get() for var in check_vars) and understand_var.get() == 1:
+        continue_button.config(state="normal", bg="#28a745", fg="white")
+    else:
+        continue_button.config(state="disabled", bg="#ccc", fg="black")
+
+# ---------------- MAIN WINDOW ----------------
+
+root = tk.Tk()
+root.title(LAB_TITLE)
+root.attributes("-fullscreen", True)
+root.configure(bg="#f5f7fa")
+
+root.protocol("WM_DELETE_WINDOW", lambda: None)
+
+# ---------------- BLOCK KEYS ----------------
+
+root.bind_all("<Alt-F4>", lambda e: "break")
+root.bind_all("<Escape>", lambda e: "break")
+root.bind_all("<Alt-Tab>", lambda e: "break")
+root.bind_all("<Key>", block_keys)
+
+# ---------------- HEADER ----------------
+
+tk.Label(
+    root,
+    text=LAB_TITLE,
+    font=("Segoe UI", 30, "bold"),
+    bg="#f5f7fa"
+).pack(pady=10)
+
+tk.Label(
+    root,
+    text=LAB_SUBTITLE,
+    font=("Segoe UI", 18),
+    fg="gray",
+    bg="#f5f7fa"
+).pack(pady=5)
+
+tk.Label(
+    root,
+    text="Please read and accept all rules to continue:",
+    font=("Segoe UI", 14),
+    bg="#f5f7fa"
+).pack(pady=10)
+
+# ---------------- SCROLLABLE FRAME ----------------
+
+container = tk.Frame(root, bg="#f5f7fa")
+container.pack(fill="both", expand=True, padx=20)
+
+canvas = tk.Canvas(container, bg="#f5f7fa", highlightthickness=0)
+scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+
+scrollable_frame = tk.Frame(canvas, bg="#f5f7fa")
+
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+)
+
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
+# ---------------- CHECKBOXES ----------------
+
+check_vars = []
+
+for rule in RULES:
+    var = tk.IntVar()
+    check_vars.append(var)
+
+    tk.Checkbutton(
+        scrollable_frame,
+        text=rule,
+        font=("Segoe UI", 12),
+        variable=var,
+        bg="#f5f7fa",
+        command=check_all_checked
+    ).pack(anchor="w", pady=5)
+
+# ---------------- FINAL CONFIRM ----------------
+
+understand_var = tk.IntVar()
+
+tk.Checkbutton(
+    root,
+    text="I have read and understood all the rules",
+    font=("Segoe UI", 12, "bold"),
+    variable=understand_var,
+    bg="#f5f7fa",
+    command=check_all_checked
+).pack(pady=10)
+
+# ---------------- BUTTON ----------------
+
+continue_button = tk.Button(
+    root,
+    text="Continue",
+    font=("Segoe UI", 14),
+    state="disabled",
+    bg="#ccc",
+    width=20,
+    command=exit_app
+)
+continue_button.pack(pady=20)
+
+# ---------------- FOOTER ----------------
+
+tk.Label(
+    root,
+    text="Contact Lab Administrator for assistance",
+    font=("Segoe UI", 10, "italic"),
+    bg="#f5f7fa"
+).place(relx=1.0, rely=1.0, anchor="se", x=-15, y=-10)
+
+# ---------------- RUN ----------------
+
+root.mainloop()
